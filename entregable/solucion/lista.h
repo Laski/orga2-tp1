@@ -1,11 +1,12 @@
 #ifndef __LISTA_H__
 #define __LISTA_H__
 
-      typedef enum boolean_e { false=0, true=1 } bolean;
+      typedef enum boolean_e { false=0, true=1 } boolean;
 
 /*** Estructuras para el tipo lista ***/
 
       typedef enum tipo_e {
+            sin_tipo=0,
             tipo_int=1,
             tipo_double=2,
             tipo_string=3

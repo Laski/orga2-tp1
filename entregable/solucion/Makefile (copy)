@@ -1,6 +1,6 @@
 EXTRAFLAGS:= -Wall -Werror -pedantic --std=c99 -ggdb -O0
 NASMEXTRAFLAGS:=-f elf64 -g -F dwarf 
-OBJS=funciones.o lista.o
+OBJS=funciones.o
 HEADS=lista.h
 EXE=tp1
 INCLUDE=-include /usr/include/errno.h
