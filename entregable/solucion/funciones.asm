@@ -12,12 +12,12 @@ global listaInsertar
 global listaDestruir
 ;global listaImprimir
 global listaFilter
-;global listaMap
-;global es_multiplo_de_5
-;global es_negativo
-;global es_largo_mayor_10
-;global tomar_primeros_10
-;global dividir_por_dos
+global listaMap
+global es_multiplo_de_5
+global es_negativo
+global es_largo_mayor_10
+global tomar_primeros_10
+global dividir_por_dos
 ;global multiplicar_por_pi
 
 %define NULL 0
@@ -358,11 +358,29 @@ listaMap:
 	sub rsp, 8; A
 	;*l está en rdi
 	mov rbx, rdi
-	; ----------------- *l está en rbx
+	mov qword r12, [rbx + primero_offset]
+	; ----------------- *l está en rbx, *nodo está en r12
+	mov r15, rsi
+	; ----------------- *funcion_map está en r15
+
+ciclo_map:
+	;terminé?
+	cmp r12, NULL
+	je termine_map
+	;procesar el nodo
+	mov r13, [r12 + dato_offset]
+	; ----------------- *dato está en r13
+	mov rdi, r13
+	call r15
+	mov [r12 + dato_offset], rax
+	;falta liberar el dato anterior
+	mov rdi, r13
+	call free
+	;paso al nodo siguiente
+	mov r12, [r12 + siguiente_offset]
+	jmp ciclo_map
 	
-
-
-
+termine_map:
 	;desarmo stack frame
 	add rsp, 8
 	pop r15
@@ -378,43 +396,51 @@ es_multiplo_de_5:
 	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
-	push rbx; D
-	push r12; A
-	push r13; D
-	push r14; A
-	push r15; D
-	sub rsp, 8; A
+	;*dato está en rdi
+	xor rdx, rdx
+	xor rax, rax
+	xor rcx, rcx
+	mov dword eax, [rdi]
+	;dato está en rax
+	mov dword ecx, 5
+	idiv ecx; divide por 5
+	;el resto está en edx
+	mov qword rax, false; la respuesta "default" es false
+	cmp edx, 0
+	je true_multiplo
+	jmp fin_multiplo
 
-	;desarmo stack frame
-	add rsp, 8
-	pop r15
-	pop r14
-	pop r13
-	pop r12
-	pop rbx
+true_multiplo:
+	mov qword rax, true
 	pop rbp
 	ret
+
+fin_multiplo:
+	;desarmo stack frame
+	pop rbp
+	ret
+
 
 ; ============ boolean es_negativo(double* dato)
 es_negativo:
 	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
-	push rbx; D
-	push r12; A
-	push r13; D
-	push r14; A
-	push r15; D
-	sub rsp, 8; A
-	
-	
+	;*dato está en rdi
+	mov qword rax, [rdi]
+	;dato está en rax
+	bt rax, 63
+	;si el número es negativo, CF debe ser 1
+	jc negativo
+	;si llegué acá el numero es positivo
+	mov qword rax, false
+	jmp fin_negativo
+
+negativo:
+	mov qword rax, true
+
+fin_negativo:
 	;desarmo stack frame
-	add rsp, 8
-	pop r15
-	pop r14
-	pop r13
-	pop r12
-	pop rbx
 	pop rbp
 	ret
 
@@ -423,21 +449,20 @@ es_largo_mayor_10:
 	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
-	push rbx; D
-	push r12; A
-	push r13; D
-	push r14; A
-	push r15; D
-	sub rsp, 8; A
-	
-	
+	;*dato está en rdi
+	;puedo usar strlen directamente
+	call strlen
+	cmp dword eax, 10
+	jg mayor
+	;si llegó hasta acá es menor o igual a diez
+	mov qword rax, false
+	jmp fin_largo
+
+mayor:
+	mov qword rax, true
+
+fin_largo:
 	;desarmo stack frame
-	add rsp, 8
-	pop r15
-	pop r14
-	pop r13
-	pop r12
-	pop rbx
 	pop rbp
 	ret
 	
@@ -453,7 +478,20 @@ dividir_por_dos:
 	push r14; A
 	push r15; D
 	sub rsp, 8; A
-	
+	;*dato está en rdi
+	;quiero moverlo a un nuevo lugar de memoria dividido por dos
+	mov rbx, rdi
+	; ----------------- *dato está en rbx
+	mov qword rdi, int_size
+	call malloc
+	; el puntero resultado está en rax
+	xor r12, r12
+	mov dword r12d, [rbx]
+	; ----------------- dato está en r12
+	shr r12, 1; lo divido por dos
+	mov dword [rax], r12d; y lo guardo
+
+	;y mi puntero resultado sigue en rax así que no hace falta moverlo
 	
 	;desarmo stack frame
 	add rsp, 8
@@ -476,6 +514,21 @@ multiplicar_por_pi:
 	push r14; A
 	push r15; D
 	sub rsp, 8; A
+	;*dato está en rdi
+	;quiero moverlo a un nuevo lugar de memoria multiplicado por pi
+	mov rbx, rdi
+	; ----------------- *dato está en rbx
+	mov qword rdi, double_size
+	call malloc
+	; el puntero resultado está en rax
+	xor r12, r12
+	movq xmm0, [rbx]
+	; ----------------- dato está en xmm0
+	;lo multiplico por pi
+	;fld 3.14159265 TO-DO
+	mulpd xmm0, xmm1
+	
+	movq [rax], xmm0; y lo guardo
 	
 	
 	;desarmo stack frame
@@ -499,8 +552,43 @@ tomar_primeros_10:
 	push r14; A
 	push r15; D
 	sub rsp, 8; A
+	;*dato está en rdi
+	;quiero moverlo a un nuevo lugar de memoria recortado
+	mov rbx, rdi
+	; ----------------- *dato está en rbx
 	
+	; a malloc tengo que pedirle 11 chars
+	lea qword rdi, [char_size * 11]
+	call malloc
+	; el puntero resultado está en rax
+	mov r12, rax
+	; ----------------- *new está en r12
+	; ahora tengo que asegurarme de que |dato| > 10
+	mov rdi, rbx
+	call strlen
+	cmp rax, 9
+	jng no_es_mayor
+
+	mov byte [r12 + 10], 0; caracter de finalización
+	mov qword rcx, 10; cantidad de iteraciones
+
+ciclo_tomar:
+	;quiero hacer mov byte [r12 + rcx], [rbx + rcx]
+	xor rdx, rdx
+	mov byte dl, [rbx + rcx - 1]
+	mov byte [r12 + rcx - 1], dl
+	loop ciclo_tomar
+	jmp termine_tomar
 	
+no_es_mayor:
+	;la longitud está en rax
+	mov byte [r12 + rax], 0; caracter de finalización
+	mov rcx, rax ; cantidad de iteraciones
+	jmp ciclo_tomar
+
+termine_tomar:
+	;devuelvo el resultado por rax
+	mov rax, r12
 	;desarmo stack frame
 	add rsp, 8
 	pop r15

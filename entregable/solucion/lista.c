@@ -117,7 +117,7 @@ void listaFilter_c(lista *l, boolean (*funcion_filter)(void*)) {
     }
 }
 
-void listaMap(lista *l, void* (*funcion_map)(void*) ) {
+void listaMap_c(lista *l, void* (*funcion_map)(void*) ) {
     nodo *tmp = l->primero;
 
     while (tmp != NULL) {
@@ -128,19 +128,19 @@ void listaMap(lista *l, void* (*funcion_map)(void*) ) {
     }
 }
 
-boolean es_multiplo_de_5(int* dato) {
+boolean es_multiplo_de_5_c(int* dato) {
     return *dato % 5 == 0;
 }
 
-boolean es_negativo(double* dato) {
+boolean es_negativo_c(double* dato) {
     return *dato < 0;
 }
 
-boolean es_largo_mayor_10(char* dato) {
+boolean es_largo_mayor_10_c(char* dato) {
     return strlen(dato) > 10;
 }
 
-int *dividir_por_dos(int *dato) {
+int *dividir_por_dos_c(int *dato) {
     int *res = malloc(sizeof(int));
     *res = *dato / 2;
     return res;
@@ -154,7 +154,7 @@ double *multiplicar_por_pi(double *dato) {
 }
 /* toma un puntero a double y retorna un puntero a double multiplicado por pi */
 
-char *tomar_primeros_10(char *dato) {
+char *tomar_primeros_10_c(char *dato) {
     char *res = malloc(sizeof(char) * 11);
     res[10] = '\0';
     strncpy(res, dato, 10);
