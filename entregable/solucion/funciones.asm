@@ -9,9 +9,9 @@
 
 global listaCrear
 global listaInsertar
-;global listaDestruir
+global listaDestruir
 ;global listaImprimir
-;global listaFilter
+global listaFilter
 ;global listaMap
 ;global es_multiplo_de_5
 ;global es_negativo
@@ -51,8 +51,9 @@ global listaInsertar
 %define siguiente_offset 0
 %define dato_offset 8
 
-extern printf
+extern fprintf
 extern malloc
+extern free
 extern strlen
 extern strcpy
 
@@ -206,10 +207,53 @@ distinto_tipo: ; MUERE!
 
 ; ============ void  listaDestruir(lista * l)
 listaDestruir:
-	;stack frame
+	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
+	push rbx; D
+	push r12; A
+	push r13; D
+	push r14; A
+	push r15; D
+	sub rsp, 8; A
+	;*l está en rdi
+	mov rbx, rdi
+	; ----------------- *l está en rbx
+	;primero quiero borrar todos los nodos (y su contenido)
+	;hasta que el siguiente sea null
+	mov r12, [rbx + primero_offset]
+	; ----------------- *nodo está en r12
+
+ciclo_destruir:
+	;me fijo si la lista no está vacía
+	cmp r12, NULL
+	je vacia_destruir
+	;borro el primer nodo y pongo en r12 el valor del siguiente
+	mov r13, [r12 + siguiente_offset]
+	; ----------------- *siguiente está en r13
+	;para llamar a free tengo que poner en rdi los punteros
+	;al contenido y después al nodo
+	mov rdi, [r12 + dato_offset]
+	call free
+	mov rdi, r12
+	call free
+	;el nuevo nodo es el siguiente a ser borrado
+	mov r12, r13
 	
+	jmp ciclo_destruir
+	
+vacia_destruir:
+	;termine con la lista, quiero borrarla también
+	mov rdi, rbx
+	call free	
+	
+	;desarmo stack frame
+	add rsp, 8
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
 	ret
 
@@ -222,14 +266,86 @@ listaImprimir:
 	pop rbp
 	ret
 
-; ============ lista  listaFilter(lista l, void* (*funcion_filter)(void*) )
+; ============ lista  listaFilter(lista * l, void* (*funcion_filter)(void*) )
 listaFilter:
-	;stack frame
+	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
+	push rbx; D
+	push r12; A
+	push r13; D
+	push r14; A
+	push r15; D
+	sub rsp, 8; A
+	;*l está en rdi, *funcion_filter esta en rsi
+	mov rbx, rdi
+	mov qword r12, [rbx + primero_offset]
+	; ----------------- *l está en rbx, *nodo está en r12
+	mov r15, rsi
+	; ----------------- *funcion_filter está en r15
+
+ciclo_filter:
+	;la lista podría estar vacía
+	cmp r12, NULL
+	je vacia_filter
+
+	;guardo el valor al siguiente nodo
+	mov qword r13, [r12 + siguiente_offset]
+	; ----------------- *siguiente está en r13
+	cmp r13, NULL
+	je falta_el_primero
+	;paso por parámetro a funcion_filter el dato del nodo siguiente
+	xor rax, rax
+	mov qword rdi, [r13 + dato_offset]
+	call r15
+	cmp al, false
+	je false_filter
+	;me muevo al siguiente nodo
+	mov r12, r13
+	jmp ciclo_filter
+
+false_filter:
+	;tengo que borrar el nodo y su contenido y corregir la estructura
+	mov rdi, [r13 + dato_offset]
+	call free
+	mov r14, [r13 + siguiente_offset]
+	; ----------------- el siguiente válido está en r14
+	mov rdi, r13
+	call free
+	;corrijo la estructura
+	mov qword [r12 + siguiente_offset], r14
+	;me desplazo al siguiente nodo
+	mov r12, r14
+	jmp ciclo_filter
 	
-	pop rbp	
+falta_el_primero:
+	;todavía tengo que mirar el primer dato
+	mov qword r12, [rbx + primero_offset]
+	mov qword rdi, [r12 + dato_offset]
+	call r15
+	cmp al, true; terminé?
+	je vacia_filter
+	;tengo que borrar el primero y su contenido y corregir la estructura
+	mov qword rdi, [r12 + dato_offset]
+	call free
+	mov qword r14, [r12 + siguiente_offset]
+	; ----------------- el siguiente válido está en r14
+	mov rdi, r12
+	call free
+	;corrijo la estructura
+	mov qword [rbx + primero_offset], r14
+
+vacia_filter:
+	;desarmo stack frame
+	add rsp, 8
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+	pop rbp
 	ret
+
 
 ; ============ lista  listaMap(lista l, void* (*funcion_map)(void*) )
 listaMap:

@@ -55,7 +55,7 @@ static nodo *borrar(nodo *n) {
     return tmp;
 }
 
-void listaDestruir(lista *l) {
+void listaDestruir_c(lista *l) {
     nodo *node = l->primero;
 
     while (node != NULL) {
@@ -99,7 +99,7 @@ void listaImprimir(lista *l, char *archivo) {
     fclose(file);
 }
 
-void listaFilter(lista *l, boolean (*funcion_filter)(void*)) {
+void listaFilter_c(lista *l, boolean (*funcion_filter)(void*)) {
     nodo *tmp = l->primero;
 
     if (tmp == NULL) return;
