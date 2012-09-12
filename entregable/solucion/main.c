@@ -13,7 +13,7 @@ int main(){
 	}
 	listaImprimir(l_i, "out.out");
 	
-	/**
+
 	lista *l_d = listaCrear();
 	double val_d = 5.2;
 	listaInsertar(l_d, tipo_double, &val_d);
@@ -37,17 +37,17 @@ int main(){
 	val_s = "holacomoteva";
 	listaInsertar(l_s, tipo_string, val_s);
 	listaImprimir(l_s, "out.out");
-	**/
+
 
 	listaFilter(l_i, (enum boolean_e (*)(void*)) es_multiplo_de_5);
 	listaImprimir(l_i, "out.out");
-	/**
+
 	listaFilter(l_d, (enum boolean_e (*)(void*)) es_negativo);
 	listaImprimir(l_d, "out.out");
 
 	listaFilter(l_s, (enum boolean_e (*)(void*)) es_largo_mayor_10);
 	listaImprimir(l_s, "out.out");	
-	**/
+
 
 
 

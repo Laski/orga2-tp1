@@ -314,8 +314,6 @@ false_filter:
 	call free
 	;corrijo la estructura
 	mov qword [r12 + siguiente_offset], r14
-	;me desplazo al siguiente nodo
-	mov r12, r14
 	jmp ciclo_filter
 	
 falta_el_primero:
@@ -349,63 +347,166 @@ vacia_filter:
 
 ; ============ lista  listaMap(lista l, void* (*funcion_map)(void*) )
 listaMap:
-	;stack frame
+	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
+	push rbx; D
+	push r12; A
+	push r13; D
+	push r14; A
+	push r15; D
+	sub rsp, 8; A
+	;*l está en rdi
+	mov rbx, rdi
+	; ----------------- *l está en rbx
 	
+
+
+
+	;desarmo stack frame
+	add rsp, 8
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
 	ret
 
 ; ============ boolean es_multiplo_de_5(int* dato)
 es_multiplo_de_5:
-	;stack frame
+	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
-	
+	push rbx; D
+	push r12; A
+	push r13; D
+	push r14; A
+	push r15; D
+	sub rsp, 8; A
+
+	;desarmo stack frame
+	add rsp, 8
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
 	ret
 
 ; ============ boolean es_negativo(double* dato)
 es_negativo:
-	;stack frame
+	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
+	push rbx; D
+	push r12; A
+	push r13; D
+	push r14; A
+	push r15; D
+	sub rsp, 8; A
 	
+	
+	;desarmo stack frame
+	add rsp, 8
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
 	ret
 
 ; ============ boolean es_largo_mayor_10(char* dato)
 es_largo_mayor_10:
-	;stack frame
+	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
+	push rbx; D
+	push r12; A
+	push r13; D
+	push r14; A
+	push r15; D
+	sub rsp, 8; A
 	
+	
+	;desarmo stack frame
+	add rsp, 8
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
 	ret
-
+	
+	
 ; ============ int* dividir_por_dos(int* dato);
 dividir_por_dos:
-	;stack frame
+	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
+	push rbx; D
+	push r12; A
+	push r13; D
+	push r14; A
+	push r15; D
+	sub rsp, 8; A
 	
+	
+	;desarmo stack frame
+	add rsp, 8
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
 	ret
 
 ; ============ double* multiplicar_por_pi(double* dato);
 multiplicar_por_pi:
-	;stack frame
+	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
+	push rbx; D
+	push r12; A
+	push r13; D
+	push r14; A
+	push r15; D
+	sub rsp, 8; A
 	
+	
+	;desarmo stack frame
+	add rsp, 8
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
 	ret
 
 ; ============ char* tomar_primeros_10(char* dato)
 tomar_primeros_10:
-	;stack frame
+	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
+	push rbx; D
+	push r12; A
+	push r13; D
+	push r14; A
+	push r15; D
+	sub rsp, 8; A
 	
+	
+	;desarmo stack frame
+	add rsp, 8
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
 	ret
