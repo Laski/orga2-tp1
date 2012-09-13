@@ -1,8 +1,0 @@
-;rdi,rsi,rdx,rcx,r8,r9
-;XMM0,XMM1,XMM2,XMM3,XMM4,XMM5,XMM6,XMM7
-;Preservar RBX, R12, R13, R14, R15
-;resultado en RAX o XMM0
-;Byte: AL, BL, CL, DL, DIL, SIL, BPL, SPL, R8L - R15L
-;Word: AX, BX, CX, DX, DI, SI, BP, SP, R8W - R15W
-;DWord: EAX, EBX, ECX, EDX, EDI, ESI, EBP, ESP, R8D - R15D
-;QWord: RAX, RBX, RCX, RDX, RDI, RSI, RBP, RSP, R8 - R15

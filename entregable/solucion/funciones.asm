@@ -306,9 +306,9 @@ listaImprimir:
 	cmp r13d, sin_tipo
 	je fin_imprimir
 	cmp r13d, tipo_double
-	;je imprimir_double
+	je imprimir_double
 	cmp r13d, tipo_string
-	;je imprimir_string
+	je imprimir_string
 	
 imprimir_int:
 	cmp r12, NULL; terminé?
@@ -332,7 +332,8 @@ imprimir_double:
 	mov rdi, r15; primer parámetro
 	mov rsi, format_double; segundo parámetro
 	mov rdx, [r12 + dato_offset]; puntero al dato
-	mov rdx, [rdx]; tercer parámetro
+	pxor xmm0, xmm0
+	movq xmm0, [rdx]; tercer parámetro
 	mov rax, 1; necesario para llamar a fprintf
 	call fprintf
 	mov r12, [r12 + siguiente_offset]; paso al siguiente nodo
@@ -345,12 +346,11 @@ imprimir_string:
 	;int fprintf ( FILE * stream, const char * format, ... );
 	mov rdi, r15; primer parámetro
 	mov rsi, format_string; segundo parámetro
-	mov rdx, [r12 + dato_offset]; puntero al dato
-	mov rdx, [rdx]; tercer parámetro
+	mov rdx, [r12 + dato_offset]; puntero al dato = tercer parámetro
 	mov rax, 1; necesario para llamar a fprintf
 	call fprintf
 	mov r12, [r12 + siguiente_offset]; paso al siguiente nodo
-	jmp imprimir_double
+	jmp imprimir_string
 
 fin_imprimir:
 	;falta imprimir el salto de línea
