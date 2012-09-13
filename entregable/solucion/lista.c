@@ -86,7 +86,7 @@ static void imprimir_lista(nodo *n, tipo t, FILE *f) {
     imprimir_lista(n->siguiente, t, f);
 }
 
-void listaImprimir(lista *l, char *archivo) {
+void listaImprimir_c(lista *l, char *archivo) {
     FILE *file = fopen(archivo, "a");
 
     if (file == NULL) {
@@ -147,7 +147,7 @@ int *dividir_por_dos_c(int *dato) {
 }
 /* toma un puntero a entero y retorna un puntero a entero dividido por dos */
 
-double *multiplicar_por_pi(double *dato) {
+double *multiplicar_por_pi_c(double *dato) {
     double *res = malloc(sizeof(double));
     *res = *dato * 3.14159265;
     return res;

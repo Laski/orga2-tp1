@@ -5,15 +5,15 @@
 #include "lista.h"
 
 int main(){
-	/**lista *l_i = listaCrear();
+	lista *l_i = listaCrear();
 	int val_i = 3;
 	while (val_i < 30){
 		listaInsertar(l_i, tipo_int, &val_i);
 		val_i++;
 	}
 	listaImprimir(l_i, "out.out");
-
-
+	
+	
 	lista *l_d = listaCrear();
 	double val_d = -10.0;
 	while (val_d < 10.0){
@@ -21,7 +21,7 @@ int main(){
 		val_d = val_d + 1.0;
 	}
 	listaImprimir(l_d, "out.out");
-	*/
+
 
 	
 	lista *l_s = listaCrear();
@@ -41,10 +41,14 @@ int main(){
 	listaImprimir(l_d, "out.out");
 	listaFilter(l_s, (enum boolean_e (*)(void*)) es_largo_mayor_10);
 	listaImprimir(l_s, "out.out");	
-	**/
 	
 	listaMap(l_s, (void * (*)(void*)) tomar_primeros_10);
 	listaImprimir(l_s, "out.out");	
+	
+	
+	listaMap(l_d, (void * (*)(void*)) multiplicar_por_pi);
+	listaImprimir(l_d, "out.out");
+	**/
 	
 	return 0;
 }

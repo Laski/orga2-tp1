@@ -10,7 +10,7 @@
 global listaCrear
 global listaInsertar
 global listaDestruir
-;global listaImprimir
+global listaImprimir
 global listaFilter
 global listaMap
 global es_multiplo_de_5
@@ -18,7 +18,7 @@ global es_negativo
 global es_largo_mayor_10
 global tomar_primeros_10
 global dividir_por_dos
-;global multiplicar_por_pi
+global multiplicar_por_pi
 
 %define NULL 0
 
@@ -51,16 +51,27 @@ global dividir_por_dos
 %define siguiente_offset 0
 %define dato_offset 8
 
+extern fopen
+extern fclose
 extern fprintf
 extern malloc
 extern free
 extern strlen
 extern strcpy
 
+
 section .data
+pi: dq 3.14159265;- pi está en [pi]
+fopen_mode: db "a", 0
+format_int: db "[%d]", 0
+format_double: db "[%f]", 0
+format_string: db "[%s]", 0
+salto_linea: db 10, 0
+format_salto: db "%s", 0
+
+
 
 section .text
-
 
 ; ============ lista * listaCrear()
 listaCrear:
@@ -125,11 +136,11 @@ copiar_dato:
 	;tres posibles y llamar a malloc dependiendo del resultado
 	xor rdi, rdi
 	
-	cmp dword [rbx + tipo_dato_offset], 1
+	cmp dword [rbx + tipo_dato_offset], tipo_int
 	je copiar_int
-	cmp dword [rbx + tipo_dato_offset], 2
+	cmp dword [rbx + tipo_dato_offset], tipo_double
 	je copiar_double
-	cmp dword [rbx + tipo_dato_offset], 3
+	cmp dword [rbx + tipo_dato_offset], tipo_string
 	je copiar_string
 
 copiar_int:
@@ -259,12 +270,110 @@ vacia_destruir:
 
 ; ============ void  listaImprimir(lista  * l, char *archivo)
 listaImprimir:
-	;stack frame
+	;armo stack frame
 	push rbp; A
 	mov rbp, rsp
+	push rbx; D
+	push r12; A
+	push r13; D
+	push r14; A
+	push r15; D
+	sub rsp, 8; A
+	;*l está en rdi, *archivo está en rsi
+	mov rbx, rdi
+	; ----------------- *l está en rbx
+	mov r15, rsi
+	; ----------------- *archivo está en r15
+	;quiero abrir el archivo para usarlo, vamos a llamar a fopen
+	;FILE * fopen ( const char * filename, const char * mode )
+	mov rdi, r15; primer parámetro
+	xor rsi, rsi
+	mov rsi, fopen_mode; segundo parámetro
+	call fopen
+	;el resultado está en rax
+	mov r15, rax
+	; ----------------- archivo está en r15
+	cmp r15, NULL
+	je fin_imprimir; manejo de errores
 	
+	;ahora quiero hacer un ciclo que recorra la lista y la imprima
+	mov qword r12, [rbx + primero_offset]
+	; ----------------- *nodo está en r12
+	;primero el chequeo de tipos
+	xor r13d, r13d
+	mov dword r13d, [rbx + tipo_dato_offset]
+	; ----------------- tipo_dato está en r13d
+	cmp r13d, sin_tipo
+	je fin_imprimir
+	cmp r13d, tipo_double
+	;je imprimir_double
+	cmp r13d, tipo_string
+	;je imprimir_string
+	
+imprimir_int:
+	cmp r12, NULL; terminé?
+	je fin_imprimir
+	;imprimo el nodo en el que estoy, quiero llamar a fprintf
+	;int fprintf ( FILE * stream, const char * format, ... );
+	mov rdi, r15; primer parámetro
+	mov rsi, format_int; segundo parámetro
+	mov rdx, [r12 + dato_offset]; puntero al dato
+	mov edx, [rdx]; tercer parámetro
+	mov rax, 1; necesario para llamar a fprintf
+	call fprintf
+	mov r12, [r12 + siguiente_offset]; paso al siguiente nodo
+	jmp imprimir_int
+	
+imprimir_double:
+	cmp r12, NULL; terminé?
+	je fin_imprimir
+	;imprimo el nodo en el que estoy, quiero llamar a fprintf
+	;int fprintf ( FILE * stream, const char * format, ... );
+	mov rdi, r15; primer parámetro
+	mov rsi, format_double; segundo parámetro
+	mov rdx, [r12 + dato_offset]; puntero al dato
+	mov rdx, [rdx]; tercer parámetro
+	mov rax, 1; necesario para llamar a fprintf
+	call fprintf
+	mov r12, [r12 + siguiente_offset]; paso al siguiente nodo
+	jmp imprimir_double
+	
+imprimir_string:
+	cmp r12, NULL; terminé?
+	je fin_imprimir
+	;imprimo el nodo en el que estoy, quiero llamar a fprintf
+	;int fprintf ( FILE * stream, const char * format, ... );
+	mov rdi, r15; primer parámetro
+	mov rsi, format_string; segundo parámetro
+	mov rdx, [r12 + dato_offset]; puntero al dato
+	mov rdx, [rdx]; tercer parámetro
+	mov rax, 1; necesario para llamar a fprintf
+	call fprintf
+	mov r12, [r12 + siguiente_offset]; paso al siguiente nodo
+	jmp imprimir_double
+
+fin_imprimir:
+	;falta imprimir el salto de línea
+	mov rdi, r15; primer parámetro
+	mov rsi, format_salto; segundo parámetro
+	mov rdx, salto_linea; tercer parámetro
+	call fprintf
+	
+	;y cerrar el archivo
+	;int fclose ( FILE * stream );
+	mov rdi, r15; primer parámetro
+	call fclose
+	
+	;desarmo stack frame
+	add rsp, 8
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
 	ret
+
 
 ; ============ lista  listaFilter(lista * l, void* (*funcion_filter)(void*) )
 listaFilter:
@@ -524,12 +633,10 @@ multiplicar_por_pi:
 	xor r12, r12
 	movq xmm0, [rbx]
 	; ----------------- dato está en xmm0
-	;lo multiplico por pi
-	;fld 3.14159265 TO-DO
-	mulpd xmm0, xmm1
+	mulsd xmm0, [pi]; - res está en xmm0
+	movq [rax], xmm0; lo guardo
 	
-	movq [rax], xmm0; y lo guardo
-	
+	;y mi puntero resultado sigue en rax así que no hace falta moverlo
 	
 	;desarmo stack frame
 	add rsp, 8
